@@ -1,34 +1,34 @@
-FROM golang:1.11 as builder
+FROM golang:1.10 as builder
 
-WORKDIR /go/src
-COPY . github.com/webflow/kubekite
-WORKDIR /go/src/github.com/webflow/kubekite/cmd/kubekite
+# Cloud builder defaults to /workspace as workspace main directory. Additionally,
+# specify the WORKDIR to be the location of our application source code which 
+# should be inside of GOPATH using standard Golang directory patterns.
+ENV GOPATH=/workspace
+WORKDIR $GOPATH/src/github.com/joinhandshake/kubekite
 
-# Build and strip our binary
-RUN CGO_ENABLED=0 GOOS=linux go build -ldflags="-s -w" -a -installsuffix cgo -o kubekite .
+# Download and install the latest release of dep, which we use for vendoring our
+# dependencies.
+ADD https://github.com/golang/dep/releases/download/v0.4.1/dep-linux-amd64 /usr/bin/dep
+RUN chmod +x /usr/bin/dep
 
-FROM ubuntu
+# Add just our Gopkg configurations to WORKDIR and install dependencies.
+COPY Gopkg.toml Gopkg.lock ./
+RUN dep ensure --vendor-only
 
-ENV GOSU_VERSION 1.10
+# Lastly, add the rest of the code and build the binary.
+COPY . ./
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o /app ./src/kubekite
 
-RUN apt-get update && \
-    apt-get -y upgrade && \
-    apt-get -y dist-upgrade && \
-    apt-get install -y curl gnupg && \
-    dpkgArch="$(dpkg --print-architecture | awk -F- '{ print $NF }')" && \
-    curl -L -o /gosu "https://github.com/tianon/gosu/releases/download/1.10/gosu-${dpkgArch}" && \
-    curl -L -o /gosu.asc "https://github.com/tianon/gosu/releases/download/1.10/gosu-${dpkgArch}.asc" && \
-    export GNUPGHOME="$(mktemp -d)" && \
-    gpg --keyserver ha.pool.sks-keyservers.net --recv-keys B42F6819007F00F88E364FD4036A9C25BF357DD4 && \
-    gpg --batch --verify /gosu.asc /gosu && \
-    rm -r /gosu.asc && \
-    chmod +x /gosu && \
-    /gosu nobody true
+# Throw out the build step of the docker image and start fresh on Alpine Linux
+FROM golang:1.10
 
-# Copy the binary over from the builder image
-COPY kubekite /
-RUN chmod +x /kubekite
+# For our final image, we'll work out of /app directory. This
+# is more flexible, our standard directory for Handshake services
+# is /app.
+WORKDIR /app/
 
 COPY job-templates/job.yaml /
 
-CMD ["/kubekite"]
+# Add the binary from our builder stage to the image and set the default CMD
+COPY --from=builder /app /app/
+CMD ["./app"]
