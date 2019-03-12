@@ -5,25 +5,25 @@ metadata:
 spec:
   selector: 
     matchLabels:
-      application: kubekite
+      app: kubekite
   replicas: 1
   template:
     metadata:
       labels:
-        application: kubekite
+        app: kubekite
     spec:
       serviceAccountName: kubekite
       containers:
       - name: kubekite
-        image: your-registry/kubekite:%VERSION%
+        image: us.gcr.io/sigma-1330/kubekite:1.0
         imagePullPolicy: Always
         env:
           - name: BUILDKITE_API_TOKEN
-            value: your-buildkite-token-here
+            valueFrom: {secretKeyRef: {name: buildkite-api, key: token}}
           - name: BUILDKITE_ORG
-            value: webflow
+            value: sigma
           - name: BUILDKITE_PIPELINE
-            value: webflow-kubekite
+            value: build-sigma-monorepo-master
         resources:
           requests:
             cpu: "0.2"
