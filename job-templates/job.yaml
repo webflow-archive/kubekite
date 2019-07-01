@@ -49,10 +49,10 @@ spec:
             subPath: browserstack-tests-deploy-key.pub
         resources:
           requests:
-            cpu: "500m"
-            memory: "8000M"
+            cpu: "2000m"
+            memory: "16000M"
           limits:
-            cpu: "4000m"
+            cpu: "8000m"
             memory: "28000M"
       volumes:
         - name: browserstack-tests-ssh-keys
