@@ -1,0 +1,6 @@
+ARG KUBEKITE_IMAGE
+FROM $KUBEKITE_IMAGE
+
+COPY job-templates/job.yaml /
+
+CMD ["/kubekite"]
