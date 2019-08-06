@@ -28,6 +28,8 @@ spec:
             value: "true"
           - name: BUILDKITE_GIT_CLEAN_FLAGS
             value: "-fdqx"
+          - name: CYPRESS_KEY
+            valueFrom: {secretKeyRef: {name: cypress-dashboard, key: token}}
         volumeMounts:
           - name: ssh-keys
             mountPath: /root/.ssh/id_rsa
