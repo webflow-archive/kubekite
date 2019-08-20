@@ -22,6 +22,8 @@ spec:
             value: dumb
           - name: BUILDKITE_AGENT_TOKEN
             valueFrom: {secretKeyRef: {name: buildkite-agent, key: token}}
+          - name: BUILDKITE_API_TOKEN
+            valueFrom: {secretKeyRef: {name: buildkite-api, key: token}}
           - name: BUILDKITE_BUILD_PATH
             value: /scratch
           - name: BUILDKITE_AGENT_DEBUG
