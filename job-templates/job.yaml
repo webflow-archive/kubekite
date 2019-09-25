@@ -54,10 +54,10 @@ spec:
         resources:
           requests:
             cpu: "2000m"
-            memory: "16000M"
+            memory: "8000M"
           limits:
-            cpu: "8000m"
-            memory: "28000M"
+            cpu: "4000m"
+            memory: "16000M"
       volumes:
         - name: browserstack-tests-ssh-keys
           secret:
