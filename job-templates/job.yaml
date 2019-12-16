@@ -32,6 +32,10 @@ spec:
             value: "-fdqx"
           - name: CYPRESS_KEY
             valueFrom: {secretKeyRef: {name: cypress-dashboard, key: token}}
+          - name: EXPO_USERNAME
+            valueFrom: {secretKeyRef: {name: expo-account, key: username}}
+          - name: EXPO_PASSWORD
+            valueFrom: {secretKeyRef: {name: expo-account, key: password}}
         volumeMounts:
           - name: ssh-keys
             mountPath: /root/.ssh/id_rsa
