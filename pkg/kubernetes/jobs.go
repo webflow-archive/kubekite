@@ -75,7 +75,8 @@ func (k *KubeJobManager) StartJobCleaner(ctx context.Context, wg *sync.WaitGroup
 	log.Info("Kube job cleaner started.")
 }
 
-// LaunchJob launches a Kubernetes job for a given Buildkite job ID
+// LaunchJob launches a Kubernetes job for a given Buildkite job
+// It dynamically decides the resources for the pod based on the job's AgentQueryRules
 func (k *KubeJobManager) LaunchJob(job *buildkite.Job) error {
 	var err error
 	var t batchv1.Job
@@ -101,10 +102,10 @@ func (k *KubeJobManager) LaunchJob(job *buildkite.Job) error {
 	container.Env = append(container.Env, tags_var)
 	for _, v := range job.AgentQueryRules {
 		split_rule := strings.Split(v, "=")
-		if len(split_rule) != 2 {
+		if len(split_rule) < 2 {
 			continue
 		}
-		rule_value := split_rule[1]
+		rule_value := strings.Join(split_rule[1:])
 		switch rule_key := split_rule[0]; rule_key {
 		case "image":
 			container.Image = rule_value
@@ -112,11 +113,13 @@ func (k *KubeJobManager) LaunchJob(job *buildkite.Job) error {
 			quantity, err := resource.ParseQuantity(rule_value)
 			if err == nil {
 				container.Resources.Requests["cpu"] = quantity
+				container.Resources.Limits["cpu"] = quantity
 			}
 		case "memory":
 			quantity, err := resource.ParseQuantity(rule_value)
 			if err == nil {
 				container.Resources.Requests["memory"] = quantity
+				container.Resources.Limits["memory"] = quantity
 			}
 		default:
 		}
