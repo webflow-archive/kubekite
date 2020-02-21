@@ -105,7 +105,7 @@ func (k *KubeJobManager) LaunchJob(job *buildkite.Job) error {
 		if len(split_rule) < 2 {
 			continue
 		}
-		rule_value := strings.Join(split_rule[1:])
+		rule_value := strings.Join(split_rule[1:], "=")
 		switch rule_key := split_rule[0]; rule_key {
 		case "image":
 			container.Image = rule_value
