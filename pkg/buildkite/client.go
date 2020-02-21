@@ -39,8 +39,8 @@ func NewBuildkiteClient(bkAPIToken string, debug bool) (*buildkite.Client, error
 }
 
 // StartBuildkiteWatcher starts a watcher that monitors a pipeline for new jobs
-func StartBuildkiteWatcher(ctx context.Context, wg *sync.WaitGroup, client *buildkite.Client, org string, pipeline string) chan string {
-	c := make(chan string, 10)
+func StartBuildkiteWatcher(ctx context.Context, wg *sync.WaitGroup, client *buildkite.Client, org string, pipeline string) chan *buildkite.Job {
+	c := make(chan *buildkite.Job, 10)
 
 	go watchBuildkiteJobs(ctx, wg, client, org, pipeline, c)
 
@@ -49,7 +49,7 @@ func StartBuildkiteWatcher(ctx context.Context, wg *sync.WaitGroup, client *buil
 	return c
 }
 
-func watchBuildkiteJobs(ctx context.Context, wg *sync.WaitGroup, client *buildkite.Client, org string, pipeline string, jobChan chan<- string) {
+func watchBuildkiteJobs(ctx context.Context, wg *sync.WaitGroup, client *buildkite.Client, org string, pipeline string, jobChan chan<- *buildkite.Job) {
 	wg.Add(1)
 	defer wg.Done()
 
@@ -65,7 +65,7 @@ func watchBuildkiteJobs(ctx context.Context, wg *sync.WaitGroup, client *buildki
 		for _, build := range builds {
 			for _, job := range build.Jobs {
 				if job.State != nil && *job.State == "scheduled" {
-					jobChan <- *job.ID
+					jobChan <- job
 				}
 			}
 		}

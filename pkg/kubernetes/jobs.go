@@ -5,18 +5,22 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"strings"
 	"sync"
 	"time"
 
+	"github.com/buildkite/go-buildkite/buildkite"
 	"github.com/ghodss/yaml"
 	batchv1 "k8s.io/api/batch/v1"
+	corev1 "k8s.io/api/core/v1"
+	resource "k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 )
 
 // KubeJobManager holds all Kubernetes job resources managed by buildkite-job-manager
 type KubeJobManager struct {
-	jobTemplate batchv1.Job
+	jobTemplate []byte
 	Client      *kubernetes.Clientset
 	Jobs        map[string]*batchv1.Job
 	JobsMutex   sync.RWMutex
@@ -54,9 +58,7 @@ func NewKubeJobManager(ctx context.Context, wg *sync.WaitGroup, templateFilename
 
 	// Marshalling a YAML pod template into a PodTemplateSpec is problematic,
 	// so we marshall it to JSON and then into the struct.
-	jsonSpec, err := yaml.YAMLToJSON(jobTemplate)
-
-	err = json.Unmarshal(jsonSpec, &k.jobTemplate)
+	k.jobTemplate, err = yaml.YAMLToJSON(jobTemplate)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -74,19 +76,52 @@ func (k *KubeJobManager) StartJobCleaner(ctx context.Context, wg *sync.WaitGroup
 }
 
 // LaunchJob launches a Kubernetes job for a given Buildkite job ID
-func (k *KubeJobManager) LaunchJob(uuid string) error {
+func (k *KubeJobManager) LaunchJob(job *buildkite.Job) error {
 	var err error
+	var t batchv1.Job
+	uuid := *job.ID
 
 	jobLabels := make(map[string]string)
 	jobLabels["kubekite-managed"] = "true"
 	jobLabels["kubekite-org"] = k.org
 	jobLabels["kubekite-pipeline"] = k.pipeline
 
-	t := k.jobTemplate
+	err = json.Unmarshal(k.jobTemplate, &t)
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	// Set our labels on both the job and the pod that it generates
 	t.SetLabels(jobLabels)
 	t.Spec.Template.SetLabels(jobLabels)
+
+	container := t.Spec.Template.Spec.Containers[0]
+
+	tags_var := corev1.EnvVar{"BUILDKITE_AGENT_TAGS", strings.Join(job.AgentQueryRules, ","), nil}
+	container.Env = append(container.Env, tags_var)
+	for _, v := range job.AgentQueryRules {
+		split_rule := strings.Split(v, "=")
+		if len(split_rule) != 2 {
+			continue
+		}
+		rule_value := split_rule[1]
+		switch rule_key := split_rule[0]; rule_key {
+		case "image":
+			container.Image = rule_value
+		case "cpu":
+			quantity, err := resource.ParseQuantity(rule_value)
+			if err == nil {
+				container.Resources.Requests["cpu"] = quantity
+			}
+		case "memory":
+			quantity, err := resource.ParseQuantity(rule_value)
+			if err == nil {
+				container.Resources.Requests["memory"] = quantity
+			}
+		default:
+		}
+	}
+	t.Spec.Template.Spec.Containers[0] = container
 
 	t.Name = "buildkite-agent-" + uuid
 
