@@ -100,6 +100,7 @@ func (k *KubeJobManager) LaunchJob(job *buildkite.Job) error {
 
 	tags_var := corev1.EnvVar{"BUILDKITE_AGENT_TAGS", strings.Join(job.AgentQueryRules, ","), nil}
 	container.Env = append(container.Env, tags_var)
+	container.Args = append(container.Args, "--acquire-job", uuid)
 	for _, v := range job.AgentQueryRules {
 		split_rule := strings.Split(v, "=")
 		if len(split_rule) < 2 {
