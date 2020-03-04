@@ -30,8 +30,13 @@ spec:
             value: "true"
           - name: BUILDKITE_GIT_CLEAN_FLAGS
             value: "-fdqx"
+            # Deprecated, please use `CYPRESS_KEY_PLATFORM` instead
           - name: CYPRESS_KEY
             valueFrom: {secretKeyRef: {name: cypress-dashboard, key: token}}
+          - name: CYPRESS_KEY_PLATFORM
+            valueFrom: {secretKeyRef: {name: cypress-dashboard, key: token}}
+          - name: CYPRESS_KEY_CIWM
+            valueFrom: {secretKeyRef: {name: cypress-dashboard, key: token-ciwm}}
           - name: EXPO_USERNAME
             valueFrom: {secretKeyRef: {name: expo-account, key: username}}
           - name: EXPO_PASSWORD
