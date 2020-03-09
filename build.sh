@@ -16,4 +16,4 @@ fi
 
 docker push $TAG
 
-
+pwd
