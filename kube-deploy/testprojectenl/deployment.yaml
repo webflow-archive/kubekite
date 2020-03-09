@@ -1,0 +1,33 @@
+apiVersion: apps/v1beta2
+kind: Deployment
+metadata:
+  name: kubekite
+spec:
+  selector: 
+    matchLabels:
+      application: kubekite
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        application: kubekite
+    spec:
+      serviceAccountName: kubekite
+      containers:
+      - name: kubekite
+        image: asia.gcr.io/test-project-buildkite/kubekite:0.5
+        imagePullPolicy: Always
+        env:
+          - name: BUILDKITE_API_TOKEN
+            valueFrom: {secretKeyRef: {name: buildkite-api, key: token }} 
+          - name: BUILDKITE_ORG
+            value: enlume-inc
+          - name: BUILDKITE_PIPELINE
+            value: test-buildkite
+        resources:
+          requests:
+            cpu: "0.2"
+            memory: "50M"
+          limits:
+            memory: "100M"
+            cpu: "0.4"
