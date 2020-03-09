@@ -7,7 +7,7 @@ steps:
   - label: ":kubekite: Build Image"
     command: "./.buildkite/scripts/build-image.sh"
     env:
-      IMAGE_NAME: asia.gcr.io/test-project-buildkite/kubekite:0.5
+      IMAGE_NAME: asia.gcr.io/test-project-buildkite/kubekite
 
   - wait
 
