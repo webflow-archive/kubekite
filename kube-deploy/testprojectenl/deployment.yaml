@@ -15,7 +15,7 @@ spec:
       serviceAccountName: kubekite
       containers:
       - name: kubekite
-        image: asia.gcr.io/test-project-buildkite/kubekite:1.0
+        image: asia.gcr.io/test-project-buildkite/kubekite:2.1
         imagePullPolicy: Always
         env:
           - name: BUILDKITE_API_TOKEN
