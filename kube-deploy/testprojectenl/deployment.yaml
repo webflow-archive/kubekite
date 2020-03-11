@@ -21,7 +21,7 @@ spec:
           - name: BUILDKITE_API_TOKEN
             valueFrom: {secretKeyRef: {name: buildkite-api, key: token }} 
           - name: BUILDKITE_ORG
-            value: testing
+            value: testing-29
           - name: BUILDKITE_PIPELINE
             value: test-buildkite
         resources:
