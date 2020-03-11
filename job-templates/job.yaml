@@ -42,10 +42,10 @@ spec:
         resources:
           requests:
             cpu: "500m"
-            memory: "8000M"
+            memory: "2000M"
           limits:
-            cpu: "4000m"
-            memory: "28000M"
+            cpu: "2000m"
+            memory: "5000M"
       volumes:
         - name: ssh-keys
           secret:
