@@ -43,11 +43,11 @@ spec:
           mountPath: /var/run/docker.sock
         resources:
           requests:
-            cpu: "500m"
-            memory: "2000M"
+            cpu: "1000m"
+            memory: "8000M"
           limits:
             cpu: "2000m"
-            memory: "5000M"
+            memory: "16000M"
       volumes:
         - name: ssh-keys
           secret:
