@@ -6,4 +6,4 @@ Kubekite is designed to be run within Kubernetes as a single-replica deployment.
 
 **Note that you will have to modify the deployment spec, these scripts, and the `pipeline.yml` to suit your infrastructure and preferred Docker registry.**
 
-# Test 
+# Test to run new pods
