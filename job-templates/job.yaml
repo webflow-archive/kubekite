@@ -13,7 +13,7 @@ spec:
       containers:
       - name: buildkite-agent
         image: buildkite/agent:latest
-        args: ["Start", "--disconnect-after-job", "--disconnect-after-job-timeout", "300"]
+        args: ["start"] #, "--disconnect-after-job", "--disconnect-after-job-timeout", "300"]
         imagePullPolicy: Always
         securityContext:
           privileged: true 
