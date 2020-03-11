@@ -40,7 +40,7 @@ spec:
         - name: docker-binary
           mountPath: /usr/bin/docker
         - name: docker-socket  
-          mountPath: /docker/docker.sock
+          mountPath: /var/run/docker.sock
         resources:
           requests:
             cpu: "500m"
