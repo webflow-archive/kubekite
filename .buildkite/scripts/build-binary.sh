@@ -20,12 +20,11 @@ fi
 git log -1 > build/public/REVISION.txt
 
 # Build the new image
-docker build \
+docker build . \
   --cache-from $IMAGE_NAME:$CACHE_TAG \
   --tag $IMAGE_NAME:$IMAGE_TAG \
   $EXTRA_TAGS \
-  -f $DOCKERFILE \
-  .
+  -f $DOCKERFILE
 
 # Execute the image so that we can get the binary out of it
 docker run $IMAGE_NAME:$IMAGE_TAG
