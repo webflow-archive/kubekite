@@ -2,7 +2,7 @@
 set -eo pipefail
 
 # Determine the image and cache tags
-#IMAGE_TAG=${BUILDKITE_BRANCH}
+IMAGE_TAG=${BUILDKITE_BRANCH}
 #CACHE_TAG=${IMAGE_TAG}
 
 # Set IMAGE_NAME to something intermediate
