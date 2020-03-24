@@ -2,8 +2,8 @@
 set -eo pipefail
 
 # Determine the image and cache tags
-IMAGE_TAG=${BUILDKITE_BRANCH}
-CACHE_TAG=${IMAGE_TAG}
+#IMAGE_TAG=${BUILDKITE_BRANCH}
+#CACHE_TAG=${IMAGE_TAG}
 
 # Set IMAGE_NAME to something intermediate
 IMAGE_NAME="kubekite-intermediate"
@@ -20,12 +20,7 @@ fi
 git log -1 > build/public/REVISION.txt
 
 # Build the new image
-docker build \
-  --cache-from $IMAGE_NAME:$CACHE_TAG \
-  -t $IMAGE_NAME:$IMAGE_TAG \
-  $EXTRA_TAGS \
-  -f $DOCKERFILE \
-  .
+docker build -f $DOCKERFILE .
 # Execute the image so that we can get the binary out of it
 docker run $IMAGE_NAME:$IMAGE_TAG
 
