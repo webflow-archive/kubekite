@@ -7,74 +7,53 @@ spec:
     metadata:
       labels:
         application: buildkite-agent
-      annotations:
-        iam.amazonaws.com/role: a-role-with-ecr-privileges-goes-here
     spec:
       restartPolicy: OnFailure
       terminationGracePeriodSeconds: 1800
       containers:
-      - name: sockguard
-        image: webflow/sockguard:1.0
-        args: ["-upstream-socket", "/docker/docker.sock", "-filename", "/sockguard-socket/sockguard.sock", "-allow-host-mode-networking", "true", "--allow-bind", "/scratch"]
-        imagePullPolicy: Always
-        securityContext:
-          privileged: true
-        volumeMounts:
-        - mountPath: /docker/docker.sock
-          name: docker-sock
-        - mountPath: /sockguard-socket
-          name: sockguard-sock
       - name: buildkite-agent
-        image: webflow/buildkite-agent-kube:3.2.1
+        image: buildkite/agent:latest
         args: ["start", "--disconnect-after-job", "--disconnect-after-job-timeout", "300"]
         imagePullPolicy: Always
         securityContext:
-          privileged: true
+          privileged: true 
         env:
           - name: TERM
             value: dumb
           - name: BUILDKITE_AGENT_TOKEN
-            value: your-token-goes-here
+            valueFrom: {secretKeyRef: {name: buildkite-agent, key: token}}
+          - name: BUILDKITE_API_TOKEN
+            valueFrom: {secretKeyRef: {name: buildkite-api, key: token}}
           - name: BUILDKITE_BUILD_PATH
             value: /scratch
-          - name: BUILDKITE_AGENT_TAGS
-            value: "queue=autoscaling-build-cluster"
           - name: BUILDKITE_AGENT_DEBUG
             value: "true"
           - name: BUILDKITE_GIT_CLEAN_FLAGS
             value: "-fdqx"
-          - name: BUILDKITE_PLUGIN_S3_SECRETS_BUCKET
-            value: "your-secrets-bucket"
-          - name: AWS_ACCESS_KEY_ID
-            valueFrom:
-              secretKeyRef:
-                name: aws-secrets
-                key: AWS_ACCESS_KEY_ID
-          - name: AWS_SECRET_ACCESS_KEY
-            valueFrom:
-              secretKeyRef:
-                name: aws-secrets
-                key: AWS_SECRET_ACCESS_KEY
         volumeMounts:
-          - mountPath: /scratch
-            name: scratch
-          - mountPath: /sockguard-socket
-            name: sockguard-sock
-          - mountPath: /docker/docker.sock
-            name: docker-sock
+        - name: ssh-keys
+          mountPath: /root/.ssh/id_rsa
+          subPath: id_rsa
+        - name: ssh-keys
+          mountPath: /root/.ssh/id_rsa.pub
+          subPath: id_rsa.pub
+        - name: docker-binary
+          mountPath: /usr/bin/docker
+        - name: docker-socket  
+          mountPath: /var/run/docker.sock
         resources:
           requests:
-            cpu: "500m"
+            cpu: "1000m"
             memory: "8000M"
           limits:
-            cpu: "4000m"
-            memory: "28000M"
+            cpu: "2000m"
+            memory: "16000M"
       volumes:
-        - name: scratch
-          emptyDir: {}
-        - name: sockguard-sock
-          emptyDir: {}
-        - name: docker-sock
-          hostPath:
-            path: /var/run/docker.sock
-            type: Socket
+        - name: ssh-keys
+          secret:
+            secretName: buildkite-agent-ssh
+            defaultMode: 0400
+        - name: docker-binary
+          hostPath: {path: /usr/bin/docker}
+        - name: docker-socket
+          hostPath: {path: /var/run/docker.sock}

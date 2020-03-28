@@ -7,8 +7,7 @@ steps:
   - label: ":kubekite: Build Image"
     command: "./.buildkite/scripts/build-image.sh"
     env:
-      IMAGE_NAME: your-registry/kubekite
-      AWS_ECR_LOGIN: true
+      IMAGE_NAME: asia.gcr.io/test-project-buildkite/kubekite
 
   - wait
 
