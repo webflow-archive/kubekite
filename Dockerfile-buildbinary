@@ -1,8 +1,8 @@
 FROM golang:1.14.1
 
 WORKDIR /go/src
-COPY . github.com/projectsigma/kubekite
-WORKDIR /go/src/github.com/projectsigma/kubekite/cmd/kubekite
+COPY . github.com/ProjectSigma/kubekite
+WORKDIR /go/src/github.com/ProjectSigma/kubekite/cmd/kubekite
 
 # Build and strip our binary
 RUN CGO_ENABLED=0 GOOS=linux go build -ldflags="-s -w" -a -installsuffix cgo -o kubekite .

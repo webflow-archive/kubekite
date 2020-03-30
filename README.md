@@ -6,7 +6,7 @@
 ### How to build a new version of the container
 - Build the binary docker image first: `docker build . -f Dockerfile-buildbinary`
 - Run the binary docker image: `docker run $IMAGE_HASH`
-- Copy the kubekite binary from the container into the root of this repo: `docker container cp $CONTAINER_HASH:/go/src/github.com/projectsigma/kubekite/cmd/kubekite/kubekite .`
+- Copy the kubekite binary from the container into the root of this repo: `docker container cp $CONTAINER_HASH:/go/src/github.com/ProjectSigma/kubekite/cmd/kubekite/kubekite .`
   - You can get the container hash by running `docker ps -ql`
 - To build and push to GCR in one go run `VERSION=[YOUR VERSION] ./build.sh`
 - Alternatively
