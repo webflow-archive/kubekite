@@ -24,7 +24,7 @@ type Author struct {
 	Email string `json:"email,omitempty"`
 }
 
-// Create a build.
+// CreateBuild - Create a build.
 type CreateBuild struct {
 	Commit  string `json:"commit"`
 	Branch  string `json:"branch"`
@@ -46,6 +46,13 @@ type Creator struct {
 	Name      string     `json:"name"`
 }
 
+// PullRequest represents a Github PR
+type PullRequest struct {
+	ID         *string `json:"id,omitempty"`
+	Base       *string `json:"base,omitempty"`
+	Repository *string `json:"repository,omitempty"`
+}
+
 // Build represents a build which has run in buildkite
 type Build struct {
 	ID          *string                `json:"id,omitempty"`
@@ -53,6 +60,7 @@ type Build struct {
 	WebURL      *string                `json:"web_url,omitempty"`
 	Number      *int                   `json:"number,omitempty"`
 	State       *string                `json:"state,omitempty"`
+	Blocked     *bool                  `json:"blocked,omitempty"`
 	Message     *string                `json:"message,omitempty"`
 	Commit      *string                `json:"commit,omitempty"`
 	Branch      *string                `json:"branch,omitempty"`
@@ -69,26 +77,9 @@ type Build struct {
 
 	// the pipeline this build is associated with
 	Pipeline *Pipeline `json:"pipeline,omitempty"`
-}
 
-// Job represents a job run during a build in buildkite
-type Job struct {
-	ID              *string    `json:"id,omitempty"`
-	Type            *string    `json:"type,omitempty"`
-	Name            *string    `json:"name,omitempty"`
-	State           *string    `json:"state,omitempty"`
-	LogsURL         *string    `json:"logs_url,omitempty"`
-	RawLogsURL      *string    `json:"raw_log_url,omitempty"`
-	Command         *string    `json:"command,omitempty"`
-	ExitStatus      *int       `json:"exit_status,omitempty"`
-	ArtifactPaths   *string    `json:"artifact_paths,omitempty"`
-	CreatedAt       *Timestamp `json:"created_at,omitempty"`
-	ScheduledAt     *Timestamp `json:"scheduled_at,omitempty"`
-	StartedAt       *Timestamp `json:"started_at,omitempty"`
-	FinishedAt      *Timestamp `json:"finished_at,omitempty"`
-	Agent           Agent      `json:"agent,omitempty"`
-	AgentQueryRules []string   `json:"agent_query_rules,omitempty"`
-	WebURL          string     `json:"web_url"`
+	// the pull request this build is associated with
+	PullRequest *PullRequest `json:"pull_request,omitempty"`
 }
 
 // BuildsListOptions specifies the optional parameters to the
@@ -117,16 +108,19 @@ type BuildsListOptions struct {
 	ListOptions
 }
 
-func (as *BuildsService) Create(org string, pipeline string, b *CreateBuild) (*Build, *Response, error) {
+// Create - Create a pipeline
+//
+// buildkite API docs: https://buildkite.com/docs/api/builds#create-a-build
+func (bs *BuildsService) Create(org string, pipeline string, b *CreateBuild) (*Build, *Response, error) {
 	u := fmt.Sprintf("v2/organizations/%s/pipelines/%s/builds", org, pipeline)
 
-	req, err := as.client.NewRequest("POST", u, b)
+	req, err := bs.client.NewRequest("POST", u, b)
 	if err != nil {
 		return nil, nil, err
 	}
 
 	build := new(Build)
-	resp, err := as.client.Do(req, build)
+	resp, err := bs.client.Do(req, build)
 	if err != nil {
 		return nil, resp, err
 	}
@@ -137,16 +131,16 @@ func (as *BuildsService) Create(org string, pipeline string, b *CreateBuild) (*B
 // Get fetches a build.
 //
 // buildkite API docs: https://buildkite.com/docs/api/builds#get-a-build
-func (as *BuildsService) Get(org string, pipeline string, id string) (*Build, *Response, error) {
+func (bs *BuildsService) Get(org string, pipeline string, id string) (*Build, *Response, error) {
 	u := fmt.Sprintf("v2/organizations/%s/pipelines/%s/builds/%s", org, pipeline, id)
 
-	req, err := as.client.NewRequest("GET", u, nil)
+	req, err := bs.client.NewRequest("GET", u, nil)
 	if err != nil {
 		return nil, nil, err
 	}
 
 	build := new(Build)
-	resp, err := as.client.Do(req, build)
+	resp, err := bs.client.Do(req, build)
 	if err != nil {
 		return nil, resp, err
 	}
@@ -233,4 +227,21 @@ func (bs *BuildsService) ListByPipeline(org string, pipeline string, opt *Builds
 	}
 
 	return *orgs, resp, err
+}
+
+// Rebuild triggers a rebuild for the target build
+//
+// buildkite API docs: https://buildkite.com/docs/apis/rest-api/builds#rebuild-a-build
+func (bs *BuildsService) Rebuild(org, pipeline, build string) (*Build, error) {
+	u := fmt.Sprintf("v2/organizations/%s/pipelines/%s/builds/%s/rebuild", org, pipeline, build)
+	req, err := bs.client.NewRequest("PUT", u, nil)
+	if err != nil {
+		return nil, err
+	}
+	result := Build{}
+	_, err = bs.client.Do(req, &result)
+	if err != nil {
+		return nil, err
+	}
+	return &result, nil
 }

@@ -31,7 +31,7 @@ docker build \
 docker run $IMAGE_NAME:$IMAGE_TAG
 
 # Copy the binary from the container
-docker container cp $(docker ps -ql):/go/src/github.com/webflow/kubekite/cmd/kubekite/kubekite . 
+docker container cp $(docker ps -ql):/go/src/github.com/projectsigma/kubekite/cmd/kubekite/kubekite .
 
 # This is a dumb hack to get around a bug in buildkite-agent where
 # artifacts cannot be named the same as the directories in which 

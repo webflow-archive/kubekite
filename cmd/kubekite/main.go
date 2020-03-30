@@ -5,8 +5,8 @@ import (
 	"os"
 	"sync"
 
-	"github.com/webflow/kubekite/pkg/buildkite"
-	kube "github.com/webflow/kubekite/pkg/kubernetes"
+	"github.com/projectsigma/kubekite/pkg/buildkite"
+	kube "github.com/projectsigma/kubekite/pkg/kubernetes"
 
 	"github.com/namsral/flag"
 	"github.com/op/go-logging"
@@ -95,7 +95,7 @@ func main() {
 	for {
 		select {
 		case job := <-jobChan:
-			err := j.LaunchJob(job)
+			err := j.LaunchJob(ctx, job)
 			if err != nil {
 				log.Error("Error launching job:", err)
 			}

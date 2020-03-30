@@ -33,7 +33,7 @@ var (
 	httpDebug = false
 )
 
-// A Client manages communication with the buildkite API.
+// Client - A Client manages communication with the buildkite API.
 type Client struct {
 	// HTTP client used to communicate with the API.
 	client *http.Client
@@ -49,6 +49,7 @@ type Client struct {
 	Agents        *AgentsService
 	Artifacts     *ArtifactsService
 	Builds        *BuildsService
+	Jobs          *JobsService
 	Organizations *OrganizationsService
 	Pipelines     *PipelinesService
 	User          *UserService
@@ -77,6 +78,7 @@ func NewClient(httpClient *http.Client) *Client {
 	c.Agents = &AgentsService{c}
 	c.Artifacts = &ArtifactsService{c}
 	c.Builds = &BuildsService{c}
+	c.Jobs = &JobsService{c}
 	c.Organizations = &OrganizationsService{c}
 	c.Pipelines = &PipelinesService{c}
 	c.User = &UserService{c}

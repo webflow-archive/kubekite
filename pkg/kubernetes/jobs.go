@@ -77,7 +77,7 @@ func (k *KubeJobManager) StartJobCleaner(ctx context.Context, wg *sync.WaitGroup
 
 // LaunchJob launches a Kubernetes job for a given Buildkite job
 // It dynamically decides the resources for the pod based on the job's AgentQueryRules
-func (k *KubeJobManager) LaunchJob(job *buildkite.Job) error {
+func (k *KubeJobManager) LaunchJob(ctx context.Context, job *buildkite.Job) error {
 	var err error
 	var t batchv1.Job
 	uuid := *job.ID
@@ -129,7 +129,7 @@ func (k *KubeJobManager) LaunchJob(job *buildkite.Job) error {
 
 	t.Name = "buildkite-agent-" + uuid
 
-	runningJob, err := k.Client.BatchV1().Jobs(k.namespace).Get(t.Name, metav1.GetOptions{})
+	runningJob, err := k.Client.BatchV1().Jobs(k.namespace).Get(ctx, t.Name, metav1.GetOptions{})
 	if err == nil {
 		log.Infof("Job %v already exists, not launching.\n", runningJob.Name)
 		return nil
@@ -140,7 +140,7 @@ func (k *KubeJobManager) LaunchJob(job *buildkite.Job) error {
 	k.Jobs[uuid] = new(batchv1.Job)
 	k.Jobs[uuid] = &t
 
-	k.Jobs[uuid], err = k.Client.BatchV1().Jobs(k.namespace).Create(k.Jobs[uuid])
+	k.Jobs[uuid], err = k.Client.BatchV1().Jobs(k.namespace).Create(ctx, k.Jobs[uuid], metav1.CreateOptions{})
 	if err != nil {
 		return fmt.Errorf("could not launch job: %v", err)
 	}
@@ -159,7 +159,7 @@ func (k *KubeJobManager) cleanCompletedJobs(ctx context.Context, wg *sync.WaitGr
 
 		log.Info("Cleaning completed jobs...")
 
-		pods, err := k.Client.CoreV1().Pods(k.namespace).List(metav1.ListOptions{LabelSelector: selector})
+		pods, err := k.Client.CoreV1().Pods(k.namespace).List(ctx, metav1.ListOptions{LabelSelector: selector})
 		if err != nil {
 			log.Errorf("Could not list pods: %v", err)
 		}
@@ -172,7 +172,7 @@ func (k *KubeJobManager) cleanCompletedJobs(ctx context.Context, wg *sync.WaitGr
 
 					policy := metav1.DeletePropagationForeground
 
-					err := k.Client.BatchV1().Jobs(k.namespace).Delete(jobName, &metav1.DeleteOptions{PropagationPolicy: &policy})
+					err := k.Client.BatchV1().Jobs(k.namespace).Delete(ctx, jobName, metav1.DeleteOptions{PropagationPolicy: &policy})
 					if err != nil {
 						log.Error("Error deleting job:", err)
 					}
