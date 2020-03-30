@@ -57,7 +57,7 @@ func watchBuildkiteJobs(ctx context.Context, wg *sync.WaitGroup, client *buildki
 
 		log.Info("Checking Buildkite API for builds and jobs...")
 
-		builds, _, err := client.Builds.ListByPipeline(org, pipeline, &buildkite.BuildsListOptions{})
+		builds, _, err := client.Builds.ListByPipeline(org, pipeline, &buildkite.BuildsListOptions{State: []string{"scheduled", "running"}})
 		if err != nil {
 			log.Error("Error fetching builds from Buildkite API:", err)
 		}
