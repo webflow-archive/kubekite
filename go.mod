@@ -14,7 +14,6 @@ require (
 	github.com/json-iterator/go v1.1.9 // indirect
 	github.com/namsral/flag v1.7.4-pre
 	github.com/op/go-logging v0.0.0-20160315200505-970db520ece7
-	github.com/projectsigma/kubekite v0.0.0-20200304222809-c438f2cb5e32
 	github.com/stretchr/testify v1.5.1 // indirect
 	golang.org/x/crypto v0.0.0-20200323165209-0ec3e9974c59 // indirect
 	golang.org/x/net v0.0.0-20200324143707-d3edc9973b7e // indirect

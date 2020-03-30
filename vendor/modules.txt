@@ -47,10 +47,6 @@ github.com/namsral/flag
 # github.com/op/go-logging v0.0.0-20160315200505-970db520ece7
 ## explicit
 github.com/op/go-logging
-# github.com/projectsigma/kubekite v0.0.0-20200304222809-c438f2cb5e32
-## explicit
-github.com/projectsigma/kubekite/pkg/buildkite
-github.com/projectsigma/kubekite/pkg/kubernetes
 # github.com/spf13/pflag v1.0.5
 github.com/spf13/pflag
 # github.com/stretchr/testify v1.5.1
