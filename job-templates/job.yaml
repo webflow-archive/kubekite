@@ -41,6 +41,8 @@ spec:
             valueFrom: {secretKeyRef: {name: expo-account, key: username}}
           - name: EXPO_PASSWORD
             valueFrom: {secretKeyRef: {name: expo-account, key: password}}
+          - name: MAILOSAUR_KEY
+            valueFrom: {secretKeyRef: {name: mailosaur-secret, key: api-key}}
         volumeMounts:
           - name: ssh-keys
             mountPath: /root/.ssh/id_rsa
